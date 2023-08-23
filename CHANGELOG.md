@@ -4,8 +4,9 @@
 
 ### Features
 
-- [#8181](https://github.com/blockscout/blockscout/pull/8181) - Insert current token balances placeholders along with historical
+- [#8285](https://github.com/blockscout/blockscout/pull/8285) - Add CG/CMC coin price sources
 - [#8210](https://github.com/blockscout/blockscout/pull/8210) - Drop address foreign keys
+- [#8181](https://github.com/blockscout/blockscout/pull/8181) - Insert current token balances placeholders along with historical
 
 ### Fixes
 

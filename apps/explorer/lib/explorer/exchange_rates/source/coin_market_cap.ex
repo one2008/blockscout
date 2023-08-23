@@ -98,7 +98,7 @@ defmodule Explorer.ExchangeRates.Source.CoinMarketCap do
     config(:coin_id)
   end
 
-  defp get_token_properties(market_data) do
+  def get_token_properties(market_data) do
     token_values_list =
       market_data
       |> Map.values()
@@ -124,7 +124,7 @@ defmodule Explorer.ExchangeRates.Source.CoinMarketCap do
     token_properties && token_properties["total_supply"]
   end
 
-  defp get_market_cap_data_usd(token_properties) do
+  def get_market_cap_data_usd(token_properties) do
     token_properties && token_properties["quote"] &&
       token_properties["quote"]["USD"] &&
       token_properties["quote"]["USD"]["market_cap"]
@@ -136,7 +136,7 @@ defmodule Explorer.ExchangeRates.Source.CoinMarketCap do
       token_properties["quote"]["USD"]["volume_24h"]
   end
 
-  defp get_last_updated(token_properties) do
+  def get_last_updated(token_properties) do
     last_updated_data = token_properties && token_properties["last_updated"]
 
     if last_updated_data do
@@ -147,7 +147,7 @@ defmodule Explorer.ExchangeRates.Source.CoinMarketCap do
     end
   end
 
-  defp get_current_price(token_properties) do
+  def get_current_price(token_properties) do
     if token_properties && token_properties["quote"] && token_properties["quote"]["USD"] &&
          token_properties["quote"]["USD"]["price"] do
       to_decimal(token_properties["quote"]["USD"]["price"])
