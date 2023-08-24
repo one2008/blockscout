@@ -14,6 +14,8 @@
 
 ### Chore
 
+- [#8281](https://github.com/blockscout/blockscout/pull/8281) - Planned removal of duplicate API endpoints: for CSV export and GraphQL
+
 <details>
   <summary>Dependencies version bumps</summary>
 
@@ -57,6 +59,7 @@
 - [#8105](https://github.com/blockscout/blockscout/pull/8105) - Extend API v1 with endpoints used by new UI
 - [#8104](https://github.com/blockscout/blockscout/pull/8104) - remove "TODO" from API v2 response
 - [#8100](https://github.com/blockscout/blockscout/pull/8100), [#8103](https://github.com/blockscout/blockscout/pull/8103) - Extend docker-compose configs with new config when front is running externally
+- [#8012](https://github.com/blockscout/blockscout/pull/8012) - API v2 smart-contract verification extended logging
 
 <details>
   <summary>Dependencies version bumps</summary>
