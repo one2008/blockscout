@@ -86,6 +86,7 @@ defmodule EthereumJSONRPC.Log do
         %{
           "address" => address_hash,
           "blockNumber" => block_number,
+          "l1BatchNumber" => l1_batch_number,
           "blockHash" => block_hash,
           "data" => data,
           "logIndex" => index,
@@ -96,6 +97,7 @@ defmodule EthereumJSONRPC.Log do
     %{
       address_hash: address_hash,
       block_number: block_number,
+      l1_batch_number: l1_batch_number,
       block_hash: block_hash,
       data: data,
       index: index,
