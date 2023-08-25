@@ -268,7 +268,7 @@ defmodule EthereumJSONRPCTest do
       if json_rpc_named_arguments[:transport] == EthereumJSONRPC.Mox do
         expect(EthereumJSONRPC.Mox, :json_rpc, fn [%{id: id}], _options ->
           block_number = "0x0"
-
+          l1_batch_number = "0x0"
           {:ok,
            [
              %{
@@ -282,6 +282,7 @@ defmodule EthereumJSONRPCTest do
                  "logsBloom" => "0x0",
                  "miner" => "0x0",
                  "number" => block_number,
+                 "l1BatchNumber" => l1_batch_number,
                  "parentHash" => "0x0",
                  "receiptsRoot" => "0x0",
                  "size" => "0x0",
@@ -438,6 +439,7 @@ defmodule EthereumJSONRPCTest do
                "logsBloom" => "0x",
                "miner" => "0x0",
                "number" => "0x0",
+               "l1BatchNumber" => "0x0",
                "parentHash" => "0x0",
                "receiptsRoot" => "0x0",
                "sha3Uncles" => "0x0",
@@ -469,6 +471,7 @@ defmodule EthereumJSONRPCTest do
                     mix_hash: "0x0",
                     nonce: 0,
                     number: 0,
+                    l1_batch_number: 0,
                     parent_hash: "0x0",
                     receipts_root: "0x0",
                     sha3_uncles: "0x0",
@@ -513,6 +516,7 @@ defmodule EthereumJSONRPCTest do
                "logsBloom" => "0x0",
                "miner" => "0x0",
                "number" => "0x0",
+               "l1BatchNumber" = "0x0",
                "parentHash" => "0x0",
                "receiptsRoot" => "0x0",
                "sha3Uncles" => "0x0",
@@ -657,6 +661,7 @@ defmodule EthereumJSONRPCTest do
              %{
                "blockHash" => nil,
                "blockNumber" => nil,
+               "l1BatchNumber" = nil,
                "from" => "0x0",
                "gas" => "0x0",
                "gasPrice" => "0x0",
@@ -962,6 +967,7 @@ defmodule EthereumJSONRPCTest do
            "logsBloom" => "0x0",
            "miner" => "0x0",
            "number" => block_number,
+           "l1BatchNumber" => l1_batch_number,
            "parentHash" => "0x0",
            "receiptsRoot" => "0x0",
            "size" => "0x0",
