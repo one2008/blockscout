@@ -20,6 +20,7 @@ defmodule EthereumJSONRPC.Block do
           mix_hash: EthereumJSONRPC.hash(),
           nonce: EthereumJSONRPC.hash(),
           number: non_neg_integer(),
+          l1BatchNumber: non_neg_integer(),
           parent_hash: EthereumJSONRPC.hash(),
           receipts_root: EthereumJSONRPC.hash(),
           sha3_uncles: EthereumJSONRPC.hash(),
