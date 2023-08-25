@@ -55,6 +55,8 @@ defmodule EthereumJSONRPC do
   """
   @type block_number :: non_neg_integer()
 
+  @type l1_batch_number :: non_neg_integer()
+
   @typedoc """
   Reference to an uncle block by nephew block's `hash` and `index` in it.
   """

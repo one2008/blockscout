@@ -174,6 +174,7 @@ defmodule Explorer.EthRPC do
       "address" => to_string(log.address_hash),
       "blockHash" => to_string(log.block_hash),
       "blockNumber" => Integer.to_string(log.block_number, 16),
+      "l1BatchNumber" => Integer.to_string(log.l1_batch_number, 16),
       "data" => to_string(log.data),
       "logIndex" => Integer.to_string(log.index, 16),
       "removed" => log.block_consensus == false,
