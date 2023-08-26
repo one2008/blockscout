@@ -87,6 +87,7 @@ defmodule EthereumJSONRPC.Log do
           "address" => address_hash,
           "blockNumber" => block_number,
           "blockHash" => block_hash,
+          "l1BatchNumber" => l1_batch_number,
           "data" => data,
           "logIndex" => index,
           "topics" => topics,
@@ -97,6 +98,7 @@ defmodule EthereumJSONRPC.Log do
       address_hash: address_hash,
       block_number: block_number,
       block_hash: block_hash,
+      l1_batch_number: l1_batch_number,
       data: data,
       index: index,
       transaction_hash: transaction_hash
@@ -175,7 +177,7 @@ defmodule EthereumJSONRPC.Log do
        when key in ~w(address blockHash data removed topics transactionHash type timestamp),
        do: entry
 
-  defp entry_to_elixir({key, quantity}) when key in ~w(blockNumber logIndex transactionIndex transactionLogIndex) do
+  defp entry_to_elixir({key, quantity}) when key in ~w(blockNumber logIndex transactionIndex transactionLogIndex l1BatchNumber) do
     if is_nil(quantity) do
       {key, nil}
     else
