@@ -304,6 +304,11 @@ defmodule EthereumJSONRPC.Receipt do
     :ignore
   end
 
+  # ZKSync fields
+  defp entry_to_elixir({key, _}) when key in ~w(l2ToL1Logs l1BatchTxIndex l1BatchNumber) do
+    :ignore
+  end
+
   # Metis fields
   defp entry_to_elixir({key, _}) when key in ~w(l1GasUsed l1GasPrice l1FeeScalar l1Fee) do
     :ignore
