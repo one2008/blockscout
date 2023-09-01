@@ -314,6 +314,7 @@ defmodule EthereumJSONRPC.Transaction do
           "transactionIndex" => index,
           "v" => v,
           "value" => value
+          "l1BatchNumber" => nil
         } = transaction
       ) do
     result = %{
@@ -485,6 +486,6 @@ defmodule EthereumJSONRPC.Transaction do
   end
 
   defp entry_to_elixir(_) do
-    :ok
+    {"l1BatchNumber", 0}
   end
 end
