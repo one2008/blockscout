@@ -51,7 +51,7 @@ defmodule EthereumJSONRPC.Transaction do
   @type params :: %{
           block_hash: EthereumJSONRPC.hash(),
           block_number: non_neg_integer(),
-          l1BatchNumber: non_neg_integer(),
+          # l1BatchNumber: non_neg_integer(),
           from_address_hash: EthereumJSONRPC.address(),
           gas: non_neg_integer(),
           gas_price: non_neg_integer(),
@@ -159,7 +159,6 @@ defmodule EthereumJSONRPC.Transaction do
           "blockHash" => block_hash,
           "blockNumber" => block_number,
           "from" => from_address_hash,
-          "chainId" => chain_id,
           "gas" => gas,
           "gasPrice" => gas_price,
           "hash" => hash,
