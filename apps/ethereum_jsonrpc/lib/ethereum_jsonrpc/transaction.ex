@@ -179,6 +179,7 @@ defmodule EthereumJSONRPC.Transaction do
     result = %{
       block_hash: block_hash,
       block_number: block_number,
+      chain_id: chain_id,
       from_address_hash: from_address_hash,
       gas: gas,
       gas_price: gas_price,
