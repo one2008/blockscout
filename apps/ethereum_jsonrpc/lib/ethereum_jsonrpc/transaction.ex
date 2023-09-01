@@ -172,7 +172,7 @@ defmodule EthereumJSONRPC.Transaction do
           "type" => type,
           "maxPriorityFeePerGas" => max_priority_fee_per_gas,
           "maxFeePerGas" => max_fee_per_gas,
-          "l1BatchNumber" => nil
+          "l1BatchNumber" => l1_batch_number
         } = transaction
       ) do
     result = %{
@@ -270,7 +270,6 @@ defmodule EthereumJSONRPC.Transaction do
           "v" => v,
           "value" => value,
           "type" => type,
-          nil => nil
         } = transaction
       ) do
     result = %{
