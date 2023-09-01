@@ -63,7 +63,7 @@ defmodule EthereumJSONRPC.Transactions do
 
   """
   def elixir_to_params(elixir) when is_list(elixir) do
-    elixir = Enum.reject(elixir, &is_nil/1)
+    elixir = Map.delete(elixir, nil)
     Enum.map(elixir, &Transaction.elixir_to_params/1)
   end
 
