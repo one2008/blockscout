@@ -485,6 +485,5 @@ defmodule EthereumJSONRPC.Transaction do
   end
 
   defp entry_to_elixir(_) do
-    :ignore
   end
 end
