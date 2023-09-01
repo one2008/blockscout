@@ -484,7 +484,7 @@ defmodule EthereumJSONRPC.Transaction do
     end
   end
 
-  defp entry_to_elixir({key: quantity}) do
-    {key, quantity}
+  defp entry_to_elixir(_) do
+    :ok
   end
 end
