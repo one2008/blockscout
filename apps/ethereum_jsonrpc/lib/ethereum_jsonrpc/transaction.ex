@@ -52,6 +52,8 @@ defmodule EthereumJSONRPC.Transaction do
           block_hash: EthereumJSONRPC.hash(),
           block_number: non_neg_integer(),
           from_address_hash: EthereumJSONRPC.address(),
+          l1_batch_number: non_neg_integer(),
+          l1_batch_tx_index: non_neg_integer(),
           gas: non_neg_integer(),
           gas_price: non_neg_integer(),
           hash: EthereumJSONRPC.hash(),
@@ -173,7 +175,8 @@ defmodule EthereumJSONRPC.Transaction do
           "type" => type,
           "maxPriorityFeePerGas" => max_priority_fee_per_gas,
           "maxFeePerGas" => max_fee_per_gas,
-          "l1BatchNumber" => l1_batch_number
+          "l1BatchNumber" => l1_batch_number,
+          "l1BatchTxIndex" => li_batch_tx_index
         } = transaction
       ) do
     result = %{
@@ -487,6 +490,6 @@ defmodule EthereumJSONRPC.Transaction do
   end
 
   defp entry_to_elixir(_) do
-    {"l1BatchNumber", 0}
+    {nil, nil}
   end
 end
