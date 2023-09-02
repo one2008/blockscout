@@ -490,6 +490,6 @@ defmodule EthereumJSONRPC.Transaction do
   end
 
   defp entry_to_elixir(_) do
-    {nil, nil}
+    {"l1BatchNumber", 0}
   end
 end
