@@ -3,7 +3,6 @@ defmodule EthereumJSONRPC.Blocks do
   Blocks format as returned by [`eth_getBlockByHash`](https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getblockbyhash)
   and [`eth_getBlockByNumber`](https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getblockbynumber) from batch requests.
   """
-  require Logger
   alias EthereumJSONRPC.{Block, Transactions, Transport, Uncles, Withdrawals}
 
   @type elixir :: [Block.elixir()]
@@ -51,7 +50,6 @@ defmodule EthereumJSONRPC.Blocks do
     elixir_withdrawals = elixir_to_withdrawals(elixir_blocks)
 
     block_second_degree_relations_params = Uncles.elixir_to_params(elixir_uncles)
-    Logger.info(elixir_transactions)
     transactions_params = Transactions.elixir_to_params(elixir_transactions)
     withdrawals_params = Withdrawals.elixir_to_params(elixir_withdrawals)
     blocks_params = elixir_to_params(elixir_blocks)

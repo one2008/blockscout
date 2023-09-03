@@ -5,8 +5,6 @@ defmodule EthereumJSONRPC.Transactions do
   [`eth_getBlockByNumber`](https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getblockbynumber).
   """
 
-  require Logger
-
   alias EthereumJSONRPC.Transaction
 
   @type elixir :: [Transaction.elixir()]
@@ -65,7 +63,6 @@ defmodule EthereumJSONRPC.Transactions do
 
   """
   def elixir_to_params(elixir) when is_list(elixir) do
-    Logger.info(elixir)
     Enum.map(elixir, &Transaction.elixir_to_params/1)
   end
 
