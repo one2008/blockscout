@@ -351,7 +351,14 @@ defmodule EthereumJSONRPC.Transaction do
       transaction_index: index
     }
 
- def elixir_to_params(
+    if transaction["creates"] do
+      Map.put(result, :created_contract_address_hash, transaction["creates"])
+    else
+      result
+    end
+  end
+
+  def elixir_to_params(
         %{
           "blockHash" => block_hash,
           "blockNumber" => block_number,
@@ -365,7 +372,8 @@ defmodule EthereumJSONRPC.Transaction do
           "nonce" => nonce,
           "to" => to_address_hash,
           "transactionIndex" => index,
-          "value" => value
+          "value" => value,
+          "type" => type
         } = transaction
       ) do
     result = %{
@@ -382,7 +390,8 @@ defmodule EthereumJSONRPC.Transaction do
       nonce: nonce,
       to_address_hash: to_address_hash,
       value: value,
-      transaction_index: index
+      transaction_index: index,
+      type: type
     }
 
     if transaction["creates"] do
