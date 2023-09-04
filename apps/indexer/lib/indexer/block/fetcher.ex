@@ -11,12 +11,11 @@ defmodule Indexer.Block.Fetcher do
 
   alias EthereumJSONRPC.{Blocks, FetchedBeneficiaries}
   alias Explorer.Chain
-  alias Explorer.Chain.{Address, Block, Hash, Import, Transaction, Wei}
+  alias Explorer.Chain.{Address, Block, Hash, Import, Transaction}
   alias Explorer.Chain.Block.Reward
   alias Explorer.Chain.Cache.Blocks, as: BlocksCache
   alias Explorer.Chain.Cache.{Accounts, BlockNumber, Transactions, Uncles}
   alias Indexer.Block.Fetcher.Receipts
-  alias Indexer.Fetcher.TokenInstance.Realtime, as: TokenInstanceRealtime
 
   alias Indexer.Fetcher.{
     BlockReward,
@@ -26,10 +25,11 @@ defmodule Indexer.Block.Fetcher do
     ReplacedTransaction,
     Token,
     TokenBalance,
+    TokenInstance,
     UncleBlock
   }
 
-  alias Indexer.{Prometheus, TokenBalances, Tracer}
+  alias Indexer.{Prometheus, Tracer}
 
   alias Indexer.Transform.{
     AddressCoinBalances,
@@ -37,8 +37,7 @@ defmodule Indexer.Block.Fetcher do
     Addresses,
     AddressTokenBalances,
     MintTransfers,
-    TokenTransfers,
-    TransactionActions
+    TokenTransfers
   }
 
   alias Indexer.Transform.Blocks, as: TransformBlocks
@@ -111,7 +110,7 @@ defmodule Indexer.Block.Fetcher do
   @spec fetch_and_import_range(t, Range.t()) ::
           {:ok, %{inserted: %{}, errors: [EthereumJSONRPC.Transport.error()]}}
           | {:error,
-             {step :: atom(), reason :: [Ecto.Changeset.t()] | term()}
+             {step :: atom(), reason :: [%Ecto.Changeset{}] | term()}
              | {step :: atom(), failed_value :: term(), changes_so_far :: term()}}
   def fetch_and_import_range(
         %__MODULE__{
@@ -130,7 +129,6 @@ defmodule Indexer.Block.Fetcher do
            %Blocks{
              blocks_params: blocks_params,
              transactions_params: transactions_params_without_receipts,
-             withdrawals_params: withdrawals_params,
              block_second_degree_relations_params: block_second_degree_relations_params,
              errors: blocks_errors
            }}} <- {:blocks, fetched_blocks},
@@ -139,10 +137,9 @@ defmodule Indexer.Block.Fetcher do
          %{logs: logs, receipts: receipts} = receipt_params,
          transactions_with_receipts = Receipts.put(transactions_params_without_receipts, receipts),
          %{token_transfers: token_transfers, tokens: tokens} = TokenTransfers.parse(logs),
-         %{transaction_actions: transaction_actions} = TransactionActions.parse(logs),
          %{mint_transfers: mint_transfers} = MintTransfers.parse(logs),
          %FetchedBeneficiaries{params_set: beneficiary_params_set, errors: beneficiaries_errors} =
-           fetch_beneficiaries(blocks, transactions_with_receipts, json_rpc_named_arguments),
+           fetch_beneficiaries(blocks, json_rpc_named_arguments),
          addresses =
            Addresses.extract_addresses(%{
              block_reward_contract_beneficiaries: MapSet.to_list(beneficiary_params_set),
@@ -150,17 +147,14 @@ defmodule Indexer.Block.Fetcher do
              logs: logs,
              mint_transfers: mint_transfers,
              token_transfers: token_transfers,
-             transactions: transactions_with_receipts,
-             transaction_actions: transaction_actions,
-             withdrawals: withdrawals_params
+             transactions: transactions_with_receipts
            }),
          coin_balances_params_set =
            %{
              beneficiary_params: MapSet.to_list(beneficiary_params_set),
              blocks_params: blocks,
              logs_params: logs,
-             transactions_params: transactions_with_receipts,
-             withdrawals: withdrawals_params
+             transactions_params: transactions_with_receipts
            }
            |> AddressCoinBalances.params_set(),
          coin_balances_params_daily_set =
@@ -169,11 +163,11 @@ defmodule Indexer.Block.Fetcher do
              blocks: blocks
            }
            |> AddressCoinBalancesDaily.params_set(),
-         beneficiaries_with_gas_payment =
-           beneficiaries_with_gas_payment(blocks, beneficiary_params_set, transactions_with_receipts),
+         beneficiaries_with_gas_payment <-
+           beneficiary_params_set
+           |> add_gas_payments(transactions_with_receipts, blocks)
+           |> BlockReward.reduce_uncle_rewards(),
          address_token_balances = AddressTokenBalances.params_set(%{token_transfers_params: token_transfers}),
-         transaction_actions =
-           Enum.map(transaction_actions, fn action -> Map.put(action, :data, Map.delete(action.data, :block_number)) end),
          {:ok, inserted} <-
            __MODULE__.import(
              state,
@@ -182,33 +176,21 @@ defmodule Indexer.Block.Fetcher do
                address_coin_balances: %{params: coin_balances_params_set},
                address_coin_balances_daily: %{params: coin_balances_params_daily_set},
                address_token_balances: %{params: address_token_balances},
-               address_current_token_balances: %{
-                 params: address_token_balances |> MapSet.to_list() |> TokenBalances.to_address_current_token_balances()
-               },
                blocks: %{params: blocks},
                block_second_degree_relations: %{params: block_second_degree_relations_params},
                block_rewards: %{errors: beneficiaries_errors, params: beneficiaries_with_gas_payment},
                logs: %{params: logs},
                token_transfers: %{params: token_transfers},
                tokens: %{on_conflict: :nothing, params: tokens},
-               transactions: %{params: transactions_with_receipts},
-               withdrawals: %{params: withdrawals_params}
+               transactions: %{params: transactions_with_receipts}
              }
-           ),
-         {:tx_actions, {:ok, inserted_tx_actions}} <-
-           {:tx_actions,
-            Chain.import(%{
-              transaction_actions: %{params: transaction_actions},
-              timeout: :infinity
-            })} do
-      inserted = Map.merge(inserted, inserted_tx_actions)
+           ) do
       Prometheus.Instrumenter.block_batch_fetch(fetch_time, callback_module)
       result = {:ok, %{inserted: inserted, errors: blocks_errors}}
       update_block_cache(inserted[:blocks])
       update_transactions_cache(inserted[:transactions])
       update_addresses_cache(inserted[:addresses])
       update_uncles_cache(inserted[:block_second_degree_relations])
-      update_withdrawals_cache(inserted[:withdrawals])
       result
     else
       {step, {:error, reason}} -> {:error, {step, reason}}
@@ -238,15 +220,6 @@ defmodule Indexer.Block.Fetcher do
     Uncles.update_from_second_degree_relations(updated_relations)
   end
 
-  defp update_withdrawals_cache([_ | _] = withdrawals) do
-    %{index: index} = List.last(withdrawals)
-    Chain.upsert_count_withdrawals(index)
-  end
-
-  defp update_withdrawals_cache(_) do
-    :ok
-  end
-
   def import(
         %__MODULE__{broadcast: broadcast, callback_module: callback_module} = state,
         options
@@ -267,16 +240,12 @@ defmodule Indexer.Block.Fetcher do
     {import_time, result} = :timer.tc(fn -> callback_module.import(state, options_with_broadcast) end)
 
     no_blocks_to_import = length(options_with_broadcast.blocks.params)
-
-    if no_blocks_to_import != 0 do
-      Prometheus.Instrumenter.block_import(import_time / no_blocks_to_import, callback_module)
-    end
-
+    Prometheus.Instrumenter.block_import(import_time / no_blocks_to_import, callback_module)
     result
   end
 
   def async_import_token_instances(%{token_transfers: token_transfers}) do
-    TokenInstanceRealtime.async_fetch(token_transfers)
+    TokenInstance.async_fetch(token_transfers)
   end
 
   def async_import_token_instances(_), do: :ok
@@ -375,48 +344,7 @@ defmodule Indexer.Block.Fetcher do
     quantity_to_integer(block_quantity)
   end
 
-  defp fetch_beneficiaries(blocks, all_transactions, json_rpc_named_arguments) do
-    case Application.get_env(:indexer, :fetch_rewards_way) do
-      "manual" -> fetch_beneficiaries_manual(blocks, all_transactions)
-      _ -> fetch_beneficiaries_by_trace_block(blocks, json_rpc_named_arguments)
-    end
-  end
-
-  def fetch_beneficiaries_manual(blocks, all_transactions) when is_list(blocks) do
-    block_transactions_map = Enum.group_by(all_transactions, & &1.block_number)
-
-    blocks
-    |> Enum.map(fn block -> fetch_beneficiaries_manual(block, block_transactions_map[block.number] || []) end)
-    |> Enum.reduce(%FetchedBeneficiaries{}, fn params_set, %{params_set: acc_params_set} = acc ->
-      %FetchedBeneficiaries{acc | params_set: MapSet.union(acc_params_set, params_set)}
-    end)
-  end
-
-  def fetch_beneficiaries_manual(block, transactions) do
-    block
-    |> Chain.block_reward_by_parts(transactions)
-    |> reward_parts_to_beneficiaries()
-  end
-
-  defp reward_parts_to_beneficiaries(reward_parts) do
-    reward =
-      reward_parts.static_reward
-      |> Wei.sum(reward_parts.txn_fees)
-      |> Wei.sub(reward_parts.burned_fees)
-      |> Wei.sum(reward_parts.uncle_reward)
-
-    MapSet.new([
-      %{
-        address_hash: reward_parts.miner_hash,
-        block_hash: reward_parts.block_hash,
-        block_number: reward_parts.block_number,
-        reward: reward,
-        address_type: :validator
-      }
-    ])
-  end
-
-  defp fetch_beneficiaries_by_trace_block(blocks, json_rpc_named_arguments) do
+  defp fetch_beneficiaries(blocks, json_rpc_named_arguments) do
     hash_string_by_number =
       Enum.into(blocks, %{}, fn %{number: number, hash: hash_string}
                                 when is_integer(number) and is_binary(hash_string) ->
@@ -478,18 +406,6 @@ defmodule Indexer.Block.Fetcher do
       end
     end)
     |> Enum.into(MapSet.new())
-  end
-
-  defp beneficiaries_with_gas_payment(blocks, beneficiary_params_set, transactions_with_receipts) do
-    case Application.get_env(:indexer, :fetch_rewards_way) do
-      "manual" ->
-        beneficiary_params_set
-
-      _ ->
-        beneficiary_params_set
-        |> add_gas_payments(transactions_with_receipts, blocks)
-        |> BlockReward.reduce_uncle_rewards()
-    end
   end
 
   defp add_gas_payments(beneficiaries, transactions, blocks) do
@@ -567,7 +483,6 @@ defmodule Indexer.Block.Fetcher do
            hash: hash
          } = address_params
        ) do
-    {{String.downcase(hash), fetched_coin_balance_block_number},
-     Map.delete(address_params, :fetched_coin_balance_block_number)}
+    {{hash, fetched_coin_balance_block_number}, Map.delete(address_params, :fetched_coin_balance_block_number)}
   end
 end
