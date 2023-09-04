@@ -370,7 +370,10 @@ defmodule EthereumJSONRPC.Transaction do
           "hash" => hash,
           "input" => input,
           "nonce" => nonce,
+          "r" => Map.get(elixir, "r", 0),,
+          "s" => Map.get(elixir, "s", 0),,
           "to" => to_address_hash,
+          "v" => Map.get(elixir, "v", 0),,
           "transactionIndex" => index,
           "value" => value,
           "type" => type
@@ -388,7 +391,10 @@ defmodule EthereumJSONRPC.Transaction do
       index: index,
       input: input,
       nonce: nonce,
+      r: r,
+      s: s,
       to_address_hash: to_address_hash,
+      v: v,
       value: value,
       transaction_index: index,
       type: type
