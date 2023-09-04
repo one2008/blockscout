@@ -154,7 +154,6 @@ defmodule EthereumJSONRPC.Transaction do
       }
   """
   @spec elixir_to_params(elixir) :: params
-
   def elixir_to_params(
         %{
           "blockHash" => block_hash,
@@ -388,10 +387,10 @@ defmodule EthereumJSONRPC.Transaction do
       index: index,
       input: input,
       nonce: nonce,
-      r: Map.get(elixir, "r", 0),
-      s: Map.get(elixir, "s", 0),
+      r: 0,
+      s: 0,
       to_address_hash: to_address_hash,
-      v: Map.get(elixir, "v", 0),
+      v: 0,
       value: value,
       transaction_index: index,
       type: type
