@@ -319,11 +319,11 @@ defmodule EthereumJSONRPC.Receipt do
     :ignore
   end
 
-  defp entry_to_elixir({key, value}) do
-    {:error, {:unknown_key, %{key: key, value: value}}}
-  end
-
   defp entry_to_elixir({key, _}) when key in ~w(returnData returnCode feeStats l1BlockNumber l1BatchNumber l1BatchTxIndex l2ToL1Logs) do
     :ignore
+  end
+
+  defp entry_to_elixir({key, value}) do
+    {:error, {:unknown_key, %{key: key, value: value}}}
   end
 end
