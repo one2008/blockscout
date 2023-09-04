@@ -51,6 +51,8 @@ defmodule EthereumJSONRPC.Transaction do
   @type params :: %{
           block_hash: EthereumJSONRPC.hash(),
           block_number: non_neg_integer(),
+          l1_batch_number: non_neg_integer(),
+          l1_batch_tx_index: non_neg_integer(),
           from_address_hash: EthereumJSONRPC.address(),
           gas: non_neg_integer(),
           gas_price: non_neg_integer(),
@@ -157,6 +159,8 @@ defmodule EthereumJSONRPC.Transaction do
         %{
           "blockHash" => block_hash,
           "blockNumber" => block_number,
+          "l1BatchNumber" => l1_batch_number,
+          "l1BatchTxIndex" => l1_batch_tx_index,
           "from" => from_address_hash,
           "gas" => gas,
           "gasPrice" => gas_price,
@@ -177,6 +181,8 @@ defmodule EthereumJSONRPC.Transaction do
     result = %{
       block_hash: block_hash,
       block_number: block_number,
+      l1_batch_number: l1_batch_number,
+      l1_batch_tx_index: l1_batch_tx_index,
       from_address_hash: from_address_hash,
       gas: gas,
       gas_price: gas_price,
@@ -208,6 +214,8 @@ defmodule EthereumJSONRPC.Transaction do
         %{
           "blockHash" => block_hash,
           "blockNumber" => block_number,
+          "l1BatchNumber" => l1_batch_number,
+          "l1BatchTxIndex" => l1_batch_tx_index,
           "from" => from_address_hash,
           "gas" => gas,
           "hash" => hash,
@@ -227,6 +235,8 @@ defmodule EthereumJSONRPC.Transaction do
     result = %{
       block_hash: block_hash,
       block_number: block_number,
+      l1_batch_number: l1_batch_number,
+      l1_batch_tx_index: l1_batch_tx_index,
       from_address_hash: from_address_hash,
       gas: gas,
       gas_price: nil,
@@ -256,6 +266,8 @@ defmodule EthereumJSONRPC.Transaction do
         %{
           "blockHash" => block_hash,
           "blockNumber" => block_number,
+          "l1BatchNumber" => l1_batch_number,
+          "l1BatchTxIndex" => l1_batch_tx_index,
           "from" => from_address_hash,
           "gas" => gas,
           "gasPrice" => gas_price,
@@ -274,6 +286,8 @@ defmodule EthereumJSONRPC.Transaction do
     result = %{
       block_hash: block_hash,
       block_number: block_number,
+      l1_batch_number: l1_batch_number,
+      l1_batch_tx_index: l1_batch_tx_index,
       from_address_hash: from_address_hash,
       gas: gas,
       gas_price: gas_price,
@@ -301,6 +315,8 @@ defmodule EthereumJSONRPC.Transaction do
         %{
           "blockHash" => block_hash,
           "blockNumber" => block_number,
+          "l1BatchNumber" => l1_batch_number,
+          "l1BatchTxIndex" => l1_batch_tx_index,
           "from" => from_address_hash,
           "gas" => gas,
           "gasPrice" => gas_price,
@@ -318,6 +334,8 @@ defmodule EthereumJSONRPC.Transaction do
     result = %{
       block_hash: block_hash,
       block_number: block_number,
+      l1_batch_number: l1_batch_number,
+      l1_batch_tx_index: l1_batch_tx_index,
       from_address_hash: from_address_hash,
       gas: gas,
       gas_price: gas_price,
@@ -454,7 +472,7 @@ defmodule EthereumJSONRPC.Transaction do
     do: {"input", value}
 
   defp entry_to_elixir({key, quantity})
-       when key in ~w(gas gasPrice nonce r s standardV v value type maxPriorityFeePerGas maxFeePerGas) and
+       when key in ~w(gas gasPrice nonce r s standardV v value type maxPriorityFeePerGas maxFeePerGas l1BatchNumber l1BatchTxIndex) and
               quantity != nil do
     {key, quantity_to_integer(quantity)}
   end
