@@ -175,7 +175,7 @@ defmodule EthereumJSONRPC.Log do
        when key in ~w(address blockHash data removed topics transactionHash type timestamp),
        do: entry
 
-  defp entry_to_elixir({key, quantity}) when key in ~w(blockNumber logIndex transactionIndex transactionLogIndex) do
+  defp entry_to_elixir({key, quantity}) when key in ~w(blockNumber logIndex logType transactionIndex transactionLogIndex) do
     if is_nil(quantity) do
       {key, nil}
     else
