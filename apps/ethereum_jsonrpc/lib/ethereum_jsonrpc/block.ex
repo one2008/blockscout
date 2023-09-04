@@ -20,6 +20,7 @@ defmodule EthereumJSONRPC.Block do
           mix_hash: EthereumJSONRPC.hash(),
           nonce: EthereumJSONRPC.hash(),
           number: non_neg_integer(),
+          l1_batch_number: non_neg_integer(),
           parent_hash: EthereumJSONRPC.hash(),
           receipts_root: EthereumJSONRPC.hash(),
           sha3_uncles: EthereumJSONRPC.hash(),
@@ -230,6 +231,7 @@ defmodule EthereumJSONRPC.Block do
       mix_hash: Map.get(elixir, "mixHash", "0x0"),
       nonce: Map.get(elixir, "nonce", 0),
       number: number,
+      l1_batch_number: l1_batch_number,
       parent_hash: parent_hash,
       receipts_root: receipts_root,
       sha3_uncles: sha3_uncles,
@@ -277,6 +279,7 @@ defmodule EthereumJSONRPC.Block do
       mix_hash: Map.get(elixir, "mixHash", "0x0"),
       nonce: Map.get(elixir, "nonce", 0),
       number: number,
+      l1_batch_number: l1_batch_number,
       parent_hash: parent_hash,
       receipts_root: receipts_root,
       sha3_uncles: sha3_uncles,
@@ -323,6 +326,7 @@ defmodule EthereumJSONRPC.Block do
       mix_hash: Map.get(elixir, "mixHash", "0x0"),
       nonce: Map.get(elixir, "nonce", 0),
       number: number,
+      l1_batch_number: l1_batch_number,
       parent_hash: parent_hash,
       receipts_root: receipts_root,
       sha3_uncles: sha3_uncles,
@@ -369,6 +373,7 @@ defmodule EthereumJSONRPC.Block do
       mix_hash: Map.get(elixir, "mixHash", "0x0"),
       nonce: Map.get(elixir, "nonce", 0),
       number: number,
+      l1_batch_number: l1_batch_number,
       parent_hash: parent_hash,
       receipts_root: receipts_root,
       sha3_uncles: sha3_uncles,
@@ -732,6 +737,11 @@ defmodule EthereumJSONRPC.Block do
   # vrf vrfProof - Harmony
   # ...
   defp entry_to_elixir({_, _}, _block) do
+    {:ignore, :ignore}
+  end
+
+  # Arbitrum/ZkSync fields
+  defp entry_to_elixir({key, _}) when key in ~w(l1BatchNumber l1BatchTxIndex l1BatchTimestamp) do
     {:ignore, :ignore}
   end
 end

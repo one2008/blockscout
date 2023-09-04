@@ -483,6 +483,10 @@ defmodule EthereumJSONRPC.Transaction do
     end
   end
 
+  defp entry_to_elixir({key, _}) when key in ~w(l1BatchNumber l1BatchTxIndex) do
+    {:ignore, :ignore}
+  end
+
   defp entry_to_elixir(_) do
     {nil, nil}
   end
