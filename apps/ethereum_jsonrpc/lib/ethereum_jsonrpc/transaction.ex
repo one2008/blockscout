@@ -370,10 +370,10 @@ defmodule EthereumJSONRPC.Transaction do
           "hash" => hash,
           "input" => input,
           "nonce" => nonce,
-          "r" => Map.get(elixir, "r", 0),,
-          "s" => Map.get(elixir, "s", 0),,
+          "r" => Map.get(elixir, "r", 0),
+          "s" => Map.get(elixir, "s", 0),
           "to" => to_address_hash,
-          "v" => Map.get(elixir, "v", 0),,
+          "v" => Map.get(elixir, "v", 0),
           "transactionIndex" => index,
           "value" => value,
           "type" => type
