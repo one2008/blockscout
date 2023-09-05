@@ -420,6 +420,7 @@ defmodule EthereumJSONRPC.Transaction do
           "s" => s,
           "to" => to_address_hash,
           "transactionIndex" => index,
+          "type" => _, 
           "v" => v,
           "value" => value
         } = transaction
@@ -441,7 +442,6 @@ defmodule EthereumJSONRPC.Transaction do
       to_address_hash: to_address_hash,
       v: v,
       value: value,
-      "type" => _, 
       transaction_index: index
     }
 
