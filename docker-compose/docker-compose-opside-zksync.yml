@@ -109,7 +109,7 @@ services:
     restart: always
     container_name: 'visualizer'
     environment:
-      -  VISUALIZER__SERVER__GRPC__ENABLED=false
+      - VISUALIZER__SERVER__GRPC__ENABLED=false
     ports:
       - 8152:8050
 
