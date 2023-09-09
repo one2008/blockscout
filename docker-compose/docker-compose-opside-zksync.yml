@@ -1,0 +1,82 @@
+version: '3.8'
+
+services:
+  redis_db:
+    extends:
+      file: ./services/docker-compose-redis.yml
+      service: redis_db
+
+  zkevm-explorer-l2-db:
+    container_name: zkevm-explorer-l2-db
+    image: postgres:14
+    restart: always
+    ports:
+      - 5436:5432
+    environment:
+      - POSTGRES_USER=l2_explorer_user
+      - POSTGRES_PASSWORD=l2_explorer_password
+      - POSTGRES_DB=l2_explorer_db
+    command: postgres -c 'max_connections=500'
+
+  zkevm-explorer-l2:
+    depends_on:
+      - zkevm-explorer-l2-db
+      - smart-contract-verifier
+      - redis_db
+    image: blockscout/blockscout:${DOCKER_TAG:-latest}
+    build:
+      context: ..
+      dockerfile: ./docker/Dockerfile.opside-zksync
+      args:
+        CACHE_EXCHANGE_RATES_PERIOD: ""
+        API_V1_READ_METHODS_DISABLED: "false"
+        DISABLE_WEBAPP: "false"
+        API_V1_WRITE_METHODS_DISABLED: "false"
+        CACHE_TOTAL_GAS_USAGE_COUNTER_ENABLED: ""
+        CACHE_ADDRESS_WITH_BALANCES_UPDATE_INTERVAL: ""
+        ADMIN_PANEL_ENABLED: ""
+        RELEASE_VERSION: 5.2.2
+    restart: always
+    stop_grace_period: 5m
+    container_name: 'blockscout'
+    links:
+      - db:database
+    command: sh -c "bin/blockscout eval \"Elixir.Explorer.ReleaseTasks.create_and_migrate()\" && bin/blockscout start"
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    environment:
+      - ETHEREUM_JSONRPC_VARIANT=geth
+      - ETHEREUM_JSONRPC_HTTP_URL=http://zkevm-explorer-json-rpc:8124
+      - DATABASE_URL=postgres://l2_explorer_user:l2_explorer_password@zkevm-explorer-l2-db:5432/l2_explorer_db
+      - ECTO_USE_SSL=false
+      - MIX_ENV=prod
+      - NETWORK=Opside Rollup
+      - SUBNETWORK=Public zkSync
+      - COIN_NAME=IDE
+      - COIN=IDE
+      - SUPPORTED_CHAINS='[{ "title":"Alpha Testnet", "url":"https://alpha.opside.info/","test_net?":true},{"title":"Opside Public zkEVM", "url":"https://public.zkevm.opside.info/","test_net?":true}]'
+      - FOOTER_CHAT_LINK=https://discord.com/invite/opsidezk
+      - RELEASE_LINK=https://github.com/opside-protocol
+      - FOOTER_GITHUB_LINK=opside-protocol
+      - FOOTER_TWITTER_LINK=https://twitter.com/OpsideZK
+      - LOGO=/images/blockscout_logo.svg
+      - LOGO_FOOTER=/images/blockscout_logo.svg
+    ports:
+      - 10002:4000
+    volumes:
+      - ./logs/:/app/logs/
+
+  smart-contract-verifier:
+    extends:
+      file: ./services/docker-compose-smart-contract-verifier.yml
+      service: smart-contract-verifier
+
+  visualizer:
+    extends:
+      file: ./services/docker-compose-visualizer.yml
+      service: visualizer
+
+  sig-provider:
+    extends:
+      file: ./services/docker-compose-sig-provider.yml
+      service: sig-provider

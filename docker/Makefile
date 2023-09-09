@@ -3,9 +3,9 @@ HOST := host.docker.internal
 DOCKER_REPO := blockscout
 APP_NAME := blockscout
 BS_CONTAINER_IMAGE := $(DOCKER_REPO)/$(APP_NAME)
-BS_CONTAINER_NAME := blockscout
+BS_CONTAINER_NAME := zkevm-explorer-l2
 PG_CONTAINER_IMAGE := postgres:14
-PG_CONTAINER_NAME := db
+PG_CONTAINER_NAME := zkevm-explorer-l2-db
 THIS_FILE = $(lastword $(MAKEFILE_LIST))
 RELEASE_VERSION ?= '5.2.2'
 PORT ?= '4000'
@@ -19,7 +19,7 @@ endif
 ifdef DATABASE_URL
 	DB_URL = $(DATABASE_URL)
 else
-	DB_URL = postgresql://postgres:@$(HOST):5432/blockscout?ssl=false
+	DB_URL = postgresql://l2_explorer_user:l2_explorer_password@$(HOST):5432/l2_explorer_db?ssl=false
 	ECTO_USE_SSL = 'false'
 endif
 BLOCKSCOUT_CONTAINER_PARAMS = -e 'MIX_ENV=prod' \
