@@ -46,7 +46,7 @@ services:
       - 'host.docker.internal:host-gateway'
     environment:
       - ETHEREUM_JSONRPC_VARIANT=geth
-      - ETHEREUM_JSONRPC_HTTP_URL=http://zkevm-explorer-json-rpc:8124
+      - ETHEREUM_JSONRPC_HTTP_URL=http://172.18.39.197:10001
       - DATABASE_URL=postgres://l2_explorer_user:l2_explorer_password@zkevm-explorer-l2-db:5432/l2_explorer_db
       - ECTO_USE_SSL=false
       - MIX_ENV=prod
