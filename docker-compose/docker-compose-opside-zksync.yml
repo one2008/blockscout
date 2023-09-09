@@ -2,9 +2,13 @@ version: '3.8'
 
 services:
   redis_db:
-    extends:
-      file: ./services/docker-compose-redis.yml
-      service: redis_db
+    image: 'redis:alpine'
+    ports:
+      - 6379:6379
+    container_name: redis_db
+    command: redis-server
+    volumes:
+      - ./redis-data:/data
 
   zkevm-explorer-l2-db:
     container_name: zkevm-explorer-l2-db
@@ -67,16 +71,53 @@ services:
       - ./logs/:/app/logs/
 
   smart-contract-verifier:
-    extends:
-      file: ./services/docker-compose-smart-contract-verifier.yml
-      service: smart-contract-verifier
+    image: ghcr.io/blockscout/smart-contract-verifier:${SMART_CONTRACT_VERIFIER_DOCKER_TAG:-latest}
+    pull_policy: always
+    platform: linux/amd64
+    restart: always
+    container_name: 'smart-contract-verifier'
+    environment:
+      - SMART_CONTRACT_VERIFIER__SERVER__HTTP__ENABLED=true
+      - SMART_CONTRACT_VERIFIER__SERVER__HTTP__ADDR=0.0.0.0:8050
+      - SMART_CONTRACT_VERIFIER__SERVER__HTTP__MAX_BODY_SIZE=2097152
+      - SMART_CONTRACT_VERIFIER__SERVER__GRPC__ENABLED=false
+      - SMART_CONTRACT_VERIFIER__SERVER__GRPC__ADDR=0.0.0.0:8051
+      - SMART_CONTRACT_VERIFIER__SOLIDITY__ENABLED=true
+      - SMART_CONTRACT_VERIFIER__SOLIDITY__COMPILERS_DIR=/tmp/solidity-compilers
+      - SMART_CONTRACT_VERIFIER__SOLIDITY__REFRESH_VERSIONS_SCHEDULE=0 0 * * * * *
+      - SMART_CONTRACT_VERIFIER__SOLIDITY__FETCHER__LIST__LIST_URL=https://solc-bin.ethereum.org/linux-amd64/list.json
+      - SMART_CONTRACT_VERIFIER__VYPER__ENABLED=true
+      - SMART_CONTRACT_VERIFIER__VYPER__COMPILERS_DIR=/tmp/vyper-compilers
+      - SMART_CONTRACT_VERIFIER__VYPER__REFRESH_VERSIONS_SCHEDULE=0 0 * * * * *
+      - SMART_CONTRACT_VERIFIER__VYPER__FETCHER__LIST__LIST_URL=https://raw.githubusercontent.com/blockscout/solc-bin/main/vyper.list.json
+      - SMART_CONTRACT_VERIFIER__SOURCIFY__ENABLED=true
+      - SMART_CONTRACT_VERIFIER__SOURCIFY__API_URL=https://sourcify.dev/server/
+      - SMART_CONTRACT_VERIFIER__SOURCIFY__VERIFICATION_ATTEMPTS=3
+      - SMART_CONTRACT_VERIFIER__SOURCIFY__REQUEST_TIMEOUT=10
+      - SMART_CONTRACT_VERIFIER__METRICS__ENABLED=false
+      - SMART_CONTRACT_VERIFIER__METRICS__ADDR=0.0.0.0:6060
+      - SMART_CONTRACT_VERIFIER__METRICS__ROUTE=/metrics
+      - SMART_CONTRACT_VERIFIER__JAEGER__ENABLED=false
+      - SMART_CONTRACT_VERIFIER__JAEGER__AGENT_ENDPOINT=localhost:6831
+    ports:
+      - 8150:8050
 
   visualizer:
-    extends:
-      file: ./services/docker-compose-visualizer.yml
-      service: visualizer
+    image: ghcr.io/blockscout/visualizer:${VISUALIZER_DOCKER_TAG:-latest}
+    pull_policy: always
+    platform: linux/amd64
+    restart: always
+    container_name: 'visualizer'
+    environment:
+      -  VISUALIZER__SERVER__GRPC__ENABLED=false
+    ports:
+      - 8152:8050
 
   sig-provider:
-    extends:
-      file: ./services/docker-compose-sig-provider.yml
-      service: sig-provider
+    image: ghcr.io/blockscout/sig-provider:${SIG_PROVIDER_DOCKER_TAG:-latest}
+    pull_policy: always
+    platform: linux/amd64
+    restart: always
+    container_name: 'sig-provider'
+    ports:
+      - 8151:8050
